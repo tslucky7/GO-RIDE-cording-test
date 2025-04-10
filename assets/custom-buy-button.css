@@ -1,0 +1,8 @@
+.product-form__buttons .product-form__submit {
+  background-color: green;
+}
+
+.product-form__buttons .product-form__submit:disabled {
+  background-color: red;
+  opacity: 1;
+}
