@@ -148,12 +148,17 @@
 
     <script src="{{ 'pickup-availability.js' | asset_url }}" defer="defer"></script>
   {%- endif -%}
+
   <p id="StockStatusText">
     {% if product.selected_or_first_available_variant.inventory_quantity < 5 %}
       Low stock
     {% else %}
       Available!
     {% endif %}
+  </p>
+
+  <p id="SizeDescriptionText">
+    {{ product.selected_or_first_available_variant.metafields.custom.size_descriptions }}
   </p>
 
   <script>
@@ -165,12 +170,21 @@
       };
       const stockStatusText = document.getElementById('StockStatusText');
 
+      const variantDescriptions = {
+        {% for variant in product.variants %}
+          "{{ variant.id }}": "{{ variant.metafields.custom.size_descriptions | escape }}"{% unless forloop.last %},{% endunless %}
+        {% endfor %}
+      };
+      const sizeDescriptionText = document.getElementById('SizeDescriptionText');
+
       updateStockStatus();
+      updateDescription();
 
       // バリアント選択の変更を監視
       document.addEventListener('change', function (event) {
         if (event.target.matches('input[type="radio"]')) {
           updateStockStatus();
+          updateDescription();
         }
       });
 
@@ -187,6 +201,17 @@
         } else {
           stockStatusText.textContent = 'Available!';
         }
+      }
+
+      // バリアントの説明を更新する関数
+      function updateDescription() {
+        const selectedVariant = document.querySelector('input[type="radio"]:checked');
+        if (!selectedVariant) return;
+
+        const selectedVariantId = selectedVariant.getAttribute('metafield-text');
+        const newDescription = variantDescriptions[selectedVariantId] || '選択されたバリアントに説明がありません';
+
+        sizeDescriptionText.textContent = newDescription;
       }
     });
   </script>
