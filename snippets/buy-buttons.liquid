@@ -148,4 +148,46 @@
 
     <script src="{{ 'pickup-availability.js' | asset_url }}" defer="defer"></script>
   {%- endif -%}
+  <p id="StockStatusText">
+    {% if product.selected_or_first_available_variant.inventory_quantity < 5 %}
+      Low stock
+    {% else %}
+      Available!
+    {% endif %}
+  </p>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const variantStocks = {
+        {% for variant in product.variants %}
+          "{{ variant.id }}": {{ variant.inventory_quantity }}{% unless forloop.last %},{% endunless %}
+        {% endfor %}
+      };
+      const stockStatusText = document.getElementById('StockStatusText');
+
+      updateStockStatus();
+
+      // バリアント選択の変更を監視
+      document.addEventListener('change', function (event) {
+        if (event.target.matches('input[type="radio"]')) {
+          updateStockStatus();
+        }
+      });
+
+      // 在庫状況を更新する関数
+      function updateStockStatus() {
+        const selectedVariant = document.querySelector('input[type="radio"]:checked');
+        if (!selectedVariant) return;
+
+        const selectedVariantId = selectedVariant.getAttribute('metafield-text');
+        const stockQuantity = variantStocks[selectedVariantId] || 0;
+
+        if (stockQuantity < 5) {
+          stockStatusText.textContent = 'Low stock';
+        } else {
+          stockStatusText.textContent = 'Available!';
+        }
+      }
+    });
+  </script>
 </div>
